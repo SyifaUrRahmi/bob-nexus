@@ -295,7 +295,19 @@ public function show($id, $roundId)
                     'round_setting_id' => 'required|exists:round_settings,id',
                 ]);
 
-                // Cek apakah peserta sudah pernah menjawab nomor soal ini
+                // 1. CEK RACE CONDITION (GLOBAL): Apakah soal ini sudah dijawab BENAR oleh peserta lain?
+                $isAlreadySolved = Answer::where('round_setting_id', $request->round_setting_id)
+                                         ->where('is_correct', true)
+                                         ->exists();
+
+                if ($isAlreadySolved) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Unfortunately, this question was just answered correctly by another participant.'
+                    ], 422);
+                }
+
+                // 2. CEK PESERTA (SELF): Cek apakah peserta INI sudah pernah menjawab nomor soal ini (salah)
                 $alreadyAnswered = Answer::where('participant_id', $request->participant_id)
                     ->where('round_id', $request->round_id)
                     ->where('round_setting_id', $request->round_setting_id)
@@ -308,7 +320,7 @@ public function show($id, $roundId)
                     ], 422);
                 }
 
-                // Ambil kunci jawaban dari round_setting_id
+                // 3. LOGIKA PENCOCOKAN: Ambil kunci jawaban dari round_setting_id
                 $setting = RoundSetting::find($request->round_setting_id);
                     
                 $userAnswer    = strtoupper(trim($request->answer));
@@ -317,7 +329,7 @@ public function show($id, $roundId)
                 $isCorrect = ($userAnswer === $correctAnswer);
                 $score     = $isCorrect ? 1 : 0;
 
-                // Simpan ke database
+                // 4. Simpan ke database
                 $answer = Answer::create([
                     'participant_id'   => $request->participant_id,
                     'round_id'         => $request->round_id,
@@ -341,7 +353,7 @@ public function show($id, $roundId)
                     'message' => $e->getMessage()
                 ], 500);
             }
-        } 
+        }
         /*
         |--------------------------------------------------------------------------
         | IMAGE SEQUENCE

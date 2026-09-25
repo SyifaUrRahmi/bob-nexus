@@ -197,13 +197,57 @@ window.fetchQuestionStatuses = function() {
 };
 
 // Event Listener Submit Form
+// Event Listener Submit Form
 document.addEventListener('submit', async function(e) {
     if (e.target && e.target.id === 'logicalAnswerForm') {
         e.preventDefault();
 
         const formData = new FormData(e.target);
+        const qNum = parseInt(formData.get('question_number'));
+        const activeParticipantId = "{{ $participant->id }}";
 
         try {
+            // ==========================================
+            // 1. PRE-CHECK: CEK STATUS SOAL SEBELUM SUBMIT
+            // ==========================================
+            const checkRes = await fetch(`/round/{{ $round->id }}/logical-statuses?participant_id=${activeParticipantId}`);
+            const statusData = await checkRes.json();
+
+            // Tutup modal lebih awal jika ada peringatan
+            const modalEl = document.getElementById('answerModal');
+            const modalObj = bootstrap.Modal.getInstance(modalEl);
+
+            // A. Cek apakah soal sudah dijawab BENAR oleh orang lain (Global)
+            if (statusData.global_correct_questions && statusData.global_correct_questions.includes(qNum)) {
+                if (modalObj) modalObj.hide();
+                Swal.fire({
+                icon: 'warning',
+                title: 'Too Late!',
+                text: 'Unfortunately, this question was just answered correctly by another participant.',
+                timer: 4000,
+                showConfirmButton: false
+            });
+                window.fetchQuestionStatuses(); // Update UI tombol menjadi hijau
+                return; // 🛑 HENTIKAN PROSES SUBMIT DISINI
+            }
+
+            // B. Cek apakah user ini sebenarnya sudah pernah salah jawab soal ini (mencegah bug multi-tab)
+            if (statusData.self_wrong_questions && statusData.self_wrong_questions.includes(qNum)) {
+                if (modalObj) modalObj.hide();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Akses Ditolak!',
+                    text: 'Kamu sudah pernah menjawab salah untuk soal ini.',
+                    timer: 4000,
+                    showConfirmButton: false
+                });
+                window.fetchQuestionStatuses(); // Update UI tombol menjadi merah
+                return; // 🛑 HENTIKAN PROSES SUBMIT DISINI
+            }
+
+            // ==========================================
+            // 2. JIKA AMAN, LANJUTKAN PROSES SUBMIT POST
+            // ==========================================
             const response = await fetch("{{ route('answer.store') }}", {
                 method: "POST",
                 headers: {
@@ -220,8 +264,7 @@ document.addEventListener('submit', async function(e) {
                 throw new Error(data.message || 'Terjadi kesalahan pada server.');
             }
 
-            const modalEl = document.getElementById('answerModal');
-            const modalObj = bootstrap.Modal.getInstance(modalEl);
+            // Sembunyikan modal jika berhasil
             if (modalObj) {
                 modalObj.hide();
             }
@@ -229,14 +272,12 @@ document.addEventListener('submit', async function(e) {
             window.fetchQuestionStatuses();
 
             // ==========================================
-            // LOGIKA BENAR / SALAH BESERTA AUDIO
+            // 3. LOGIKA BENAR / SALAH BESERTA AUDIO
             // ==========================================
             if (data.is_correct) {
-                // 1. Putar Audio Benar
                 let audioBenar = new Audio("{{ asset('audio/correct_answer.mp4') }}");
                 audioBenar.play().catch(err => console.log("Audio diblokir:", err));
 
-                // 2. Tampilkan SweetAlert Benar
                 Swal.fire({
                     icon: 'success',
                     title: 'CORRECT ANSWER!',
@@ -244,14 +285,12 @@ document.addEventListener('submit', async function(e) {
                     timer: 5000, 
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = "/"; // Redirect ke halaman awal
+                    window.location.href = "/";
                 });
             } else {
-                // 1. Putar Audio Salah
                 let audioSalah = new Audio("{{ asset('audio/wrong_answer.mp4') }}");
                 audioSalah.play().catch(err => console.log("Audio diblokir:", err));
 
-                // 2. Tampilkan SweetAlert Salah
                 Swal.fire({
                     icon: 'error',
                     title: 'WRONG ANSWER!',
@@ -259,7 +298,7 @@ document.addEventListener('submit', async function(e) {
                     timer: 5000, 
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = "/"; // Redirect ke halaman awal
+                    window.location.href = "/";
                 });
             }
 
