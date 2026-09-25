@@ -58,6 +58,9 @@
     </style>
 
     <div class="flex-grow-1 p-4">
+        <a href="/rounds" class="btn btn-outline-secondary mb-3">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
         <div class="d-flex justify-content-between mb-3">
             <div>
                 <h4 style="color: var(--primary-color)">Round Details - {{ strtoupper($round->type) }}</h4>
@@ -158,7 +161,7 @@
         {{-- TABEL RIWAYAT JAWABAN (UNTUK SEMUA TIPE RONDE) --}}
         <div class="card">
             <div class="card-header bg-white fw-bold">
-                Riwayat Pengiriman Jawaban
+                Submission History
             </div>
             <div class="card-body p-0">
                 <table class="table table-bordered mb-0">

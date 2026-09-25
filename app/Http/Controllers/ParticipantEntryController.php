@@ -12,7 +12,7 @@ class ParticipantEntryController extends Controller
     public function index()
     {
         $round = Round::where('is_active', true)->first();
-        $participants = Participant::all();
+        $participants = Participant::where('status', 'active')->get();
         return view('bob.entry.index', compact('round', 'participants'));
     }
 }

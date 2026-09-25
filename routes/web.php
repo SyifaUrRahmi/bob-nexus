@@ -45,6 +45,8 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::get('/round/{id}/answers', [RoundController::class, 'getAnswers']);
     Route::post('/rounds/{id}/activate', [RoundController::class, 'activate']);
+
+    Route::patch('/participants/{participant}/toggle-status', [ParticipantController::class, 'toggleStatus']);
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])

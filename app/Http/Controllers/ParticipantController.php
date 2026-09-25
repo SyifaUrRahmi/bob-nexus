@@ -95,4 +95,16 @@ class ParticipantController extends Controller
         return redirect('/participants')->with('success', 'Participant deleted successfully.');
         
     }
+
+    public function toggleStatus(Participant $participant)
+{
+    // Jika status saat ini 'active', maka ubah jadi 'eliminated'. Sebaliknya, jadikan 'active'
+    $newStatus = $participant->status === 'active' ? 'eliminated' : 'active';
+
+    $participant->update([
+        'status' => $newStatus
+    ]);
+
+    return redirect()->back()->with('success', 'Status peserta berhasil diubah!');
+}
 }

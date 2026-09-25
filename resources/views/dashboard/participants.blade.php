@@ -48,6 +48,7 @@
                         <th class="text-center">Queue Number</th>
                         <th class="text-center">Name</th>
                         <th class="text-center">School</th>
+                        <th class="text-center">Status</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -57,6 +58,17 @@
                             <td class="px-3 text-center">{{ $participant->queue_number }}</td>
                             <td class="text-center">{{ $participant->name }}</td>
                             <td class="text-center">{{ $participant->school }}</td>
+                            <!-- Kolom Status Baru -->
+                            <td class="text-center">
+                                <form action="/participants/{{ $participant->id }}/toggle-status" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <!-- Ubah warna dan teks tombol berdasarkan nilai kolom 'status' -->
+                                    <button type="submit" class="btn btn-sm {{ $participant->status === 'active' ? 'btn-success' : 'btn-secondary' }}">
+                                        {{ $participant->status === 'active' ? 'Aktif' : 'Eliminasi' }}
+                                    </button>
+                                </form>
+                            </td>
                             <td class="d-flex justify-content-center">
                                 <div class="bg-warning px-2 rounded me-2"><a
                                         href="/participants/{{ $participant->id }}/edit"><i
