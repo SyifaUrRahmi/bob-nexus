@@ -80,8 +80,8 @@
                 <div class="col">
                     <div class="card board-card h-100">
                         <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center py-3">
-                            <span class="fs-5"><i class="bi bi-grid-3x3-gap-fill me-2"></i> PAPAN {{ $boardNum }}</span>
-                            <span class="badge bg-light text-primary fs-6">Soal #{{ $firstQ }} - #{{ $lastQ }}</span>
+                            <span class="fs-5"><i class="bi bi-grid-3x3-gap-fill me-2"></i> BOARD {{ $boardNum }}</span>
+                            <span class="badge bg-light text-primary fs-6">Question {{ $firstQ }} - {{ $lastQ }}</span>
                         </div>
                         <div class="card-body p-3">
                             <div class="row row-cols-5 g-2">
@@ -92,7 +92,7 @@
                                             id="btn-q-{{ $setting->question_number }}"
                                             class="btn question-btn q-available"
                                             onclick="openAnswerModal({{ $setting->question_number }}, {{ $setting->id }})">
-                                            #{{ $setting->question_number }}
+                                            {{ $setting->question_number }}
                                         </button>
                                     </div>
                                 @endforeach
@@ -110,7 +110,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Input Jawaban - Soal <span id="modalQNum">#1</span></h5>
+                <h5 class="modal-title fw-bold">Enter Answer - Question <span id="modalQNum">1</span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
@@ -122,18 +122,18 @@
                     <input type="hidden" name="question_number" id="modalQuestionNumInput">
                     <input type="hidden" name="round_setting_id" id="modalRoundSettingIdInput">
 
-                    <label class="form-label fw-bold text-muted mb-2">MASUKKAN JAWABAN ANDA:</label>
+                    <!-- <label class="form-label fw-bold text-muted mb-2">MASUKKAN JAWABAN ANDA:</label> -->
                     <input 
                         type="text" 
                         name="answer" 
                         id="modalAnswerInput" 
                         class="form-control form-control-lg text-center fw-bold fs-3 text-uppercase" 
-                        placeholder="Ketik Jawaban..." 
+                        placeholder="Answer..." 
                         required 
                         autocomplete="off">
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">CANCEL</button>
                     <button type="submit" class="btn btn-success px-5 fw-bold">SUBMIT</button>
                 </div>
             </form>
@@ -228,27 +228,40 @@ document.addEventListener('submit', async function(e) {
 
             window.fetchQuestionStatuses();
 
-        if (data.is_correct) {
-            Swal.fire({
-                icon: 'success',
-                title: 'JAWABAN BENAR!',
-                text: 'Soal ini berhasil diselesaikan',
-                timer: 2500, // Tampil selama 2.5 detik
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/"; // Redirect ke halaman awal
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'JAWABAN SALAH!',
-                text: 'Anda tidak diperbolehkan menjawab soal ini lagi.',
-                timer: 2500, // Tampil selama 2.5 detik
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/"; // Redirect ke halaman awal
-            });
-        }
+            // ==========================================
+            // LOGIKA BENAR / SALAH BESERTA AUDIO
+            // ==========================================
+            if (data.is_correct) {
+                // 1. Putar Audio Benar
+                let audioBenar = new Audio("{{ asset('audio/correct_answer.mp4') }}");
+                audioBenar.play().catch(err => console.log("Audio diblokir:", err));
+
+                // 2. Tampilkan SweetAlert Benar
+                Swal.fire({
+                    icon: 'success',
+                    title: 'CORRECT ANSWER!',
+                    text: 'This question has been successfully solved.',
+                    timer: 5000, 
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "/"; // Redirect ke halaman awal
+                });
+            } else {
+                // 1. Putar Audio Salah
+                let audioSalah = new Audio("{{ asset('audio/wrong_answer.mp4') }}");
+                audioSalah.play().catch(err => console.log("Audio diblokir:", err));
+
+                // 2. Tampilkan SweetAlert Salah
+                Swal.fire({
+                    icon: 'error',
+                    title: 'WRONG ANSWER!',
+                    text: 'You are no longer allowed to answer this question.',
+                    timer: 5000, 
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "/"; // Redirect ke halaman awal
+                });
+            }
 
         } catch (error) {
             console.error('ERROR SUBMIT:', error);

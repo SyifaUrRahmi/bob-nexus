@@ -104,16 +104,16 @@
         <!-- Informasi Sisa Kesempatan -->
         <div class="text-center mb-3">
             @if ($isMaxed)
-                <span class="badge bg-danger fs-6">Kesempatan Menjawab Sudah Habis (3/3)</span>
+                <span class="badge bg-danger fs-6">No more attempts left (3/3)</span>
             @else
-                <span class="badge bg-info text-dark fs-6">Percobaan ke-{{ $attemptsCount + 1 }} dari 3</span>
+                <span class="badge bg-info text-dark fs-6">Attempt {{ $attemptsCount + 1 }} of 3</span>
             @endif
         </div>
 
         <!-- Input jawaban (Tanpa readonly agar peserta bisa pakai keyboard fisik) -->
         <input type="text" id="answerInput" name="answer" 
             class="form-control answer-display mb-4 text-uppercase fw-bold text-center fs-4" 
-            placeholder="Ketik jawaban..." 
+            placeholder="Answer ..." 
             autocomplete="off"
             required {{ $isMaxed ? 'disabled' : '' }}>
 

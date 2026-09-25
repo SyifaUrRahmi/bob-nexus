@@ -70,8 +70,8 @@
                 ✓
             </div>
         </div>
-        <h4 class="fw-bold text-dark mb-2">Jawaban Tersimpan!</h4>
-        <p class="text-muted mb-0">Silakan tunggu soal berikutnya...</p>
+        <h4 class="fw-bold text-dark mb-2">Answer Saved!</h4>
+        <p class="text-muted mb-0">Waiting for the next question...</p>
     </div>
 </div>
 
@@ -86,7 +86,7 @@
 
     <div class="text-center mb-4">
         <h3 class="fw-bold">
-            Soal Nomor {{ $roundSetting->question_number }}
+            Question {{ $roundSetting->question_number }}
         </h3>
     </div>
 
@@ -149,8 +149,13 @@ function submitAnswer(e) {
     })
     .then(res => res.json())
     .then(data => {
-        // Tampilkan Pop-Up tanpa memberitahu Benar/Salah
+        // 1. Tampilkan Pop-Up tanpa memberitahu Benar/Salah
         document.getElementById('popupSaved').classList.remove('d-none');
+
+        // 2. Putar Audio Jawaban Tersimpan
+        let audioUrl = "{{ asset('audio/answers_saved.mp4') }}"; // Pastikan nama file sesuai
+        let audio = new Audio(audioUrl);
+        audio.play().catch(err => console.log("Audio diblokir oleh browser:", err));
     })
     .catch(err => {
         console.error("Error submitting answer:", err);

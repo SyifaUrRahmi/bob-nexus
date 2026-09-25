@@ -181,7 +181,7 @@
                             @php
                                 $colspan = 5; // Default (contoh: spatial, image_sequence)
                                 if($round->type === 'logic') $colspan = 6;
-                                if($round->type === 'image_squance') $colspan = 4;
+                                if($round->type === 'image_sequence') $colspan = 4;
                             @endphp
                             <td colspan="{{ $colspan }}" class="text-center text-muted">
                                 Waiting for answers...
@@ -218,7 +218,7 @@ function loadAnswers() {
                 let totalCols = 5;
                 @if($round->type === 'logic')
                     totalCols = 6;
-                @elseif($round->type === 'image_squance')
+                @elseif($round->type === 'image_sequence')
                     totalCols = 4;
                 @endif
 
@@ -268,20 +268,19 @@ function loadAnswers() {
 
                         let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
 
-                        // Susun HTML Baris dengan mengecualikan jawaban jika tipenya image_squance
+                        // Susun HTML Baris dengan mengecualikan jawaban jika tipenya image_sequence
                         row.innerHTML = `
                             <td class="text-center">${queueNum}</td>
                             <td class="text-center">${name}</td>
                             @if($round->type === 'logic')
                                 <td class="text-center fw-bold">#${qNum}</td>
                             @endif
-                            @if($round->type !== 'image_squance')
+                            @if($round->type !== 'image_sequence')
                                 <td class="text-center text-primary fw-bold">${textJawaban}</td>
                             @endif
                             <td class="text-center">${resultDisplay}</td>
                             <td class="text-center">${timeFormatted}</td>
                         `;
-
                         table.appendChild(row);
                     }
                 });

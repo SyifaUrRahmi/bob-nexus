@@ -61,9 +61,9 @@
             <!-- Pesan Informasi Sisa Kesempatan -->
 <div class="text-center mb-3">
     @if ($isMaxed)
-        <span class="badge fs-6"  style="background: #dd3f66;">Kesempatan Menjawab Sudah Habis (3/3)</span>
+        <span class="badge fs-6"  style="background: #dd3f66;">No more attempts left (3/3)</span>
     @else
-        <span class="badge fs-6" style="background: #5a70f9;">Percobaan ke-{{ $attemptsCount + 1 }} dari 3</span>
+        <span class="badge fs-6" style="background: #5a70f9;">Attempt {{ $attemptsCount + 1 }} of 3</span>
     @endif
 </div>
 
