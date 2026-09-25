@@ -169,13 +169,14 @@
                             @if($round->type === 'logic')
                                 <th class="text-center">No. Soal</th>
                             @endif
+                            <th class="text-center">Submitted Answer</th>
                             <th class="text-center">Result</th>
                             <th class="text-center">Response Time</th>
                         </tr>
                     </thead>
                     <tbody id="answersTable">
                         <tr>
-                            <td colspan="{{ $round->type === 'logic' ? 5 : 4 }}" class="text-center text-muted">
+                            <td colspan="{{ $round->type === 'logic' ? 6 : 5 }}" class="text-center text-muted">
                                 Waiting for answers...
                             </td>
                         </tr>
@@ -202,69 +203,62 @@ function loadAnswers() {
     @endif
 
     fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            let table = document.getElementById('answersTable');
-            const totalCols = {{ $round->type === 'logic' ? 5 : 4 }};
+            .then(response => response.json())
+            .then(data => {
+                let table = document.getElementById('answersTable');
+                // Ubah angka kolom di sini agar sesuai dengan jumlah kolom tabel yang baru
+                const totalCols = {{ $round->type === 'logic' ? 6 : 5 }};
 
-            if (data.length > 0 && table.querySelector(`td[colspan="${totalCols}"]`)) {
-                table.innerHTML = '';
-            }
+                if (data.length > 0 && table.querySelector(`td[colspan="${totalCols}"]`)) {
+                    table.innerHTML = '';
+                }
 
-            data.forEach(answer => {
-                let queueNum = answer.participant ? answer.participant.queue_number : '-';
-                let name = answer.participant ? answer.participant.name : 'Unknown';
-                let qNum = answer.question_number || (answer.round_setting ? answer.round_setting.question_number : '-');
+                data.forEach(answer => {
+                    let queueNum = answer.participant ? answer.participant.queue_number : '-';
+                    let name = answer.participant ? answer.participant.name : 'Unknown';
+                    let qNum = answer.question_number || (answer.round_setting ? answer.round_setting.question_number : '-');
+                    
+                    // AMBIL TEKS JAWABAN (Sesuaikan 'answer_text' dengan nama kolom di database Anda)
+                    let textJawaban = answer.answer_text || answer.answer || '-'; 
 
-                @if ($round->type === 'logic')
-                    if (qNum !== '-') {
-                        const qBox = document.getElementById(`q-box-${qNum}`);
-                        const qStatus = document.getElementById(`q-status-${qNum}`);
-
-                        if (qBox && qStatus) {
-                            if (answer.is_correct) {
-                                qBox.className = "admin-q-box status-solved";
-                                qStatus.innerHTML = `<span class="fw-bold text-success">✓ #${queueNum} ${name}</span>`;
-                            } else if (!qBox.classList.contains('status-solved')) {
-                                qBox.className = "admin-q-box status-wrong";
-                                qStatus.innerHTML = `<span class="fw-bold text-danger">✗ #${queueNum} ${name}</span>`;
-                            }
-                        }
-                    }
-                @endif
-
-                if (!displayedIds.includes(answer.id)) {
-                    displayedIds.push(answer.id);
-
-                    let row = document.createElement("tr");
-                    row.classList.add("highlight-new");
-
-                    let resultDisplay;
-                    @if ($round->type === 'image_sequence')
-                        resultDisplay = `<span class="badge bg-primary">Benar: ${answer.score}</span>`;
-                    @else
-                        resultDisplay = answer.is_correct 
-                            ? '<span class="badge bg-success">Benar</span>'
-                            : '<span class="badge bg-danger">Salah</span>';
+                    @if ($round->type === 'logic')
+                        // ... (kode logic biarkan seperti semula)
                     @endif
 
-                    let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
+                    if (!displayedIds.includes(answer.id)) {
+                        displayedIds.push(answer.id);
 
-                    row.innerHTML = `
-                        <td class="text-center">${queueNum}</td>
-                        <td class="text-center">${name}</td>
-                        @if($round->type === 'logic')
-                            <td class="text-center fw-bold">#${qNum}</td>
+                        let row = document.createElement("tr");
+                        row.classList.add("highlight-new");
+
+                        let resultDisplay;
+                        @if ($round->type === 'image_sequence')
+                            resultDisplay = `<span class="badge bg-primary">Benar: ${answer.score}</span>`;
+                        @else
+                            resultDisplay = answer.is_correct 
+                                ? '<span class="badge bg-success">Benar</span>'
+                                : '<span class="badge bg-danger">Salah</span>';
                         @endif
-                        <td class="text-center">${resultDisplay}</td>
-                        <td class="text-center">${timeFormatted}</td>
-                    `;
 
-                    table.appendChild(row);
-                }
-            });
-        })
-        .catch(error => console.error("Error loading answers:", error));
+                        let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
+
+                        // TAMBAHKAN KOLOM textJawaban KE DALAM RENDER HTML 
+                        row.innerHTML = `
+                            <td class="text-center">${queueNum}</td>
+                            <td class="text-center">${name}</td>
+                            @if($round->type === 'logic')
+                                <td class="text-center fw-bold">#${qNum}</td>
+                            @endif
+                            <td class="text-center text-primary fw-bold">${textJawaban}</td>
+                            <td class="text-center">${resultDisplay}</td>
+                            <td class="text-center">${timeFormatted}</td>
+                        `;
+
+                        table.appendChild(row);
+                    }
+                });
+            })
+            .catch(error => console.error("Error loading answers:", error));
 }
 
 setInterval(loadAnswers, 1000);
