@@ -169,14 +169,21 @@
                             @if($round->type === 'logic')
                                 <th class="text-center">No. Soal</th>
                             @endif
-                            <th class="text-center">Submitted Answer</th>
+                            @if($round->type !== 'image_sequence')
+                                <th class="text-center">Submitted Answer</th>
+                            @endif
                             <th class="text-center">Result</th>
                             <th class="text-center">Response Time</th>
                         </tr>
                     </thead>
                     <tbody id="answersTable">
                         <tr>
-                            <td colspan="{{ $round->type === 'logic' ? 6 : 5 }}" class="text-center text-muted">
+                            @php
+                                $colspan = 5; // Default (contoh: spatial, image_sequence)
+                                if($round->type === 'logic') $colspan = 6;
+                                if($round->type === 'image_squance') $colspan = 4;
+                            @endphp
+                            <td colspan="{{ $colspan }}" class="text-center text-muted">
                                 Waiting for answers...
                             </td>
                         </tr>
@@ -202,12 +209,18 @@ function loadAnswers() {
         }
     @endif
 
-    fetch(url)
+   fetch(url)
             .then(response => response.json())
             .then(data => {
                 let table = document.getElementById('answersTable');
-                // Ubah angka kolom di sini agar sesuai dengan jumlah kolom tabel yang baru
-                const totalCols = {{ $round->type === 'logic' ? 6 : 5 }};
+                
+                // Hitung total kolom secara dinamis dengan Blade
+                let totalCols = 5;
+                @if($round->type === 'logic')
+                    totalCols = 6;
+                @elseif($round->type === 'image_squance')
+                    totalCols = 4;
+                @endif
 
                 if (data.length > 0 && table.querySelector(`td[colspan="${totalCols}"]`)) {
                     table.innerHTML = '';
@@ -218,11 +231,24 @@ function loadAnswers() {
                     let name = answer.participant ? answer.participant.name : 'Unknown';
                     let qNum = answer.question_number || (answer.round_setting ? answer.round_setting.question_number : '-');
                     
-                    // AMBIL TEKS JAWABAN (Sesuaikan 'answer_text' dengan nama kolom di database Anda)
+                    // AMBIL TEKS JAWABAN (Sesuaikan 'answer_text' dengan database)
                     let textJawaban = answer.answer_text || answer.answer || '-'; 
 
                     @if ($round->type === 'logic')
-                        // ... (kode logic biarkan seperti semula)
+                        if (qNum !== '-') {
+                            const qBox = document.getElementById(`q-box-${qNum}`);
+                            const qStatus = document.getElementById(`q-status-${qNum}`);
+
+                            if (qBox && qStatus) {
+                                if (answer.is_correct) {
+                                    qBox.className = "admin-q-box status-solved";
+                                    qStatus.innerHTML = `<span class="fw-bold text-success">✓ #${queueNum} ${name}</span>`;
+                                } else if (!qBox.classList.contains('status-solved')) {
+                                    qBox.className = "admin-q-box status-wrong";
+                                    qStatus.innerHTML = `<span class="fw-bold text-danger">✗ #${queueNum} ${name}</span>`;
+                                }
+                            }
+                        }
                     @endif
 
                     if (!displayedIds.includes(answer.id)) {
@@ -242,14 +268,16 @@ function loadAnswers() {
 
                         let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
 
-                        // TAMBAHKAN KOLOM textJawaban KE DALAM RENDER HTML 
+                        // Susun HTML Baris dengan mengecualikan jawaban jika tipenya image_squance
                         row.innerHTML = `
                             <td class="text-center">${queueNum}</td>
                             <td class="text-center">${name}</td>
                             @if($round->type === 'logic')
                                 <td class="text-center fw-bold">#${qNum}</td>
                             @endif
-                            <td class="text-center text-primary fw-bold">${textJawaban}</td>
+                            @if($round->type !== 'image_squance')
+                                <td class="text-center text-primary fw-bold">${textJawaban}</td>
+                            @endif
                             <td class="text-center">${resultDisplay}</td>
                             <td class="text-center">${timeFormatted}</td>
                         `;
