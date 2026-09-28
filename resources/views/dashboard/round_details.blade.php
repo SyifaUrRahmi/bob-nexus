@@ -213,91 +213,112 @@ function loadAnswers() {
     @endif
 
    fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                let table = document.getElementById('answersTable');
-                
-                // Hitung total kolom secara dinamis dengan Blade
-                let totalCols = 5;
-                @if($round->type === 'logic')
-                    totalCols = 6;
-                @elseif($round->type === 'image_sequence')
-                    totalCols = 4;
-                @endif
+        .then(response => response.json())
+        .then(data => {
+            let table = document.getElementById('answersTable');
 
-                if (data.length > 0 && table.querySelector(`td[colspan="${totalCols}"]`)) {
-                    table.innerHTML = '';
-                }
-
-                data.forEach(answer => {
-                    let queueNum = answer.participant ? answer.participant.queue_number : '-';
-                    let name = answer.participant ? answer.participant.name : 'Unknown';
-                    let qNum = answer.question_number || (answer.round_setting ? answer.round_setting.question_number : '-');
+            // 1. LOGIKA SORTING DINAMIS
+            data.sort((a, b) => {
+                @if ($round->type === 'image_sequence')
+                    // Jika tipe image_sequence, urutkan berdasarkan jumlah benar (score) tertinggi ke terendah
+                    let scoreA = parseFloat(a.score || 0);
+                    let scoreB = parseFloat(b.score || 0);
+                    return scoreB - scoreA; // Descending
+                @else
+                    // Jika tipe lain, urutkan berdasarkan selisih terdekat dengan kunci jawaban
+                    let ansA = parseFloat(a.answer_text || a.answer || 0);
+                    let ansB = parseFloat(b.answer_text || b.answer || 0);
                     
-                    // AMBIL TEKS JAWABAN (Sesuaikan 'answer_text' dengan database)
-                    let textJawaban = answer.answer_text || answer.answer || '-'; 
+                    // Sesuaikan 'correct_answer' dengan nama field di response JSON Anda
+                    let keyA = parseFloat(a.round_setting?.correct_answer || a.correct_answer || 0); 
+                    let keyB = parseFloat(b.round_setting?.correct_answer || b.correct_answer || 0);
+                    
+                    let diffA = Math.abs(ansA - keyA);
+                    let diffB = Math.abs(ansB - keyB);
+                    
+                    return diffA - diffB; // Ascending (selisih terkecil di atas)
+                @endif
+            });
 
-                    @if ($round->type === 'logic')
-                        if (qNum !== '-') {
-                            const qBox = document.getElementById(`q-box-${qNum}`);
-                            const qStatus = document.getElementById(`q-status-${qNum}`);
+            // 2. KOSONGKAN TABEL
+            table.innerHTML = '';
 
-                            if (qBox && qStatus) {
-                                if (answer.is_correct) {
-                                    qBox.className = "admin-q-box status-solved";
-                                    qStatus.innerHTML = `<span class="fw-bold text-success">✓ #${queueNum} ${name}</span>`;
-                                } else if (!qBox.classList.contains('status-solved')) {
-                                    qBox.className = "admin-q-box status-wrong";
-                                    qStatus.innerHTML = `<span class="fw-bold text-danger">✗ #${queueNum} ${name}</span>`;
-                                }
+            // 3. RENDER ULANG DATA
+            data.forEach(answer => {
+                let queueNum = answer.participant ? answer.participant.queue_number : '-';
+                let name = answer.participant ? answer.participant.name : 'Unknown';
+                let qNum = answer.question_number || (answer.round_setting ? answer.round_setting.question_number : '-');
+                
+                let textJawaban = answer.answer_text || answer.answer || '-'; 
+
+                @if ($round->type === 'logic')
+                    if (qNum !== '-') {
+                        const qBox = document.getElementById(`q-box-${qNum}`);
+                        const qStatus = document.getElementById(`q-status-${qNum}`);
+
+                        if (qBox && qStatus) {
+                            if (answer.is_correct) {
+                                qBox.className = "admin-q-box status-solved";
+                                qStatus.innerHTML = `<span class="fw-bold text-success">✓ #${queueNum} ${name}</span>`;
+                            } else if (!qBox.classList.contains('status-solved')) {
+                                qBox.className = "admin-q-box status-wrong";
+                                qStatus.innerHTML = `<span class="fw-bold text-danger">✗ #${queueNum} ${name}</span>`;
                             }
                         }
-                    @endif
-
-                    if (!displayedIds.includes(answer.id)) {
-                        displayedIds.push(answer.id);
-
-                        let row = document.createElement("tr");
-                        row.classList.add("highlight-new");
-
-                        let resultDisplay;
-                        @if ($round->type === 'image_sequence')
-                            resultDisplay = `<span class="badge bg-primary">Benar: ${answer.score}</span>`;
-                        @else
-                            resultDisplay = answer.is_correct 
-                                ? '<span class="badge bg-success">Benar</span>'
-                                : '<span class="badge bg-danger">Salah</span>';
-                        @endif
-
-                        let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
-
-                        // Susun HTML Baris dengan mengecualikan jawaban jika tipenya image_sequence
-                        row.innerHTML = `
-                            <td class="text-center">${queueNum}</td>
-                            <td class="text-center">${name}</td>
-                            @if($round->type === 'logic')
-                                <td class="text-center fw-bold">#${qNum}</td>
-                            @endif
-                            @if($round->type !== 'image_sequence')
-                                <td class="text-center text-primary fw-bold">${textJawaban}</td>
-                            @endif
-                            <td class="text-center">${resultDisplay}</td>
-                            <td class="text-center">${timeFormatted}</td>
-                        `;
-                        table.appendChild(row);
                     }
-                });
-            })
-            .catch(error => console.error("Error loading answers:", error));
+                @endif
+
+                let row = document.createElement("tr");
+                
+                // Animasi berkedip kuning hanya untuk jawaban yang baru ter-fetch
+                if (!displayedIds.includes(answer.id)) {
+                    displayedIds.push(answer.id);
+                    row.classList.add("highlight-new");
+                }
+
+                let resultDisplay;
+                @if ($round->type === 'image_sequence')
+                    resultDisplay = `<span class="badge bg-primary">Benar: ${answer.score}</span>`;
+                @else
+                    resultDisplay = answer.is_correct 
+                        ? '<span class="badge bg-success">Benar</span>'
+                        : '<span class="badge bg-danger">Salah</span>';
+                @endif
+
+                let timeFormatted = new Date(answer.created_at).toLocaleTimeString('id-ID');
+
+                row.innerHTML = `
+                    <td class="text-center">${queueNum}</td>
+                    <td class="text-center">${name}</td>
+                    @if($round->type === 'logic')
+                        <td class="text-center fw-bold">#${qNum}</td>
+                    @endif
+                    @if($round->type !== 'image_sequence')
+                        <td class="text-center text-primary fw-bold">${textJawaban}</td>
+                    @endif
+                    <td class="text-center">${resultDisplay}</td>
+                    <td class="text-center">${timeFormatted}</td>
+                `;
+                table.appendChild(row);
+            });
+
+            // Tampilkan fallback jika kosong
+            if (data.length === 0) {
+                let totalCols = 5;
+                @if($round->type === 'logic') totalCols = 6;
+                @elseif($round->type === 'image_sequence') totalCols = 4;
+                @endif
+                table.innerHTML = `<tr><td colspan="${totalCols}" class="text-center text-muted">Waiting for answers...</td></tr>`;
+            }
+        })
+        .catch(error => console.error("Error loading answers:", error));
 }
 
 setInterval(loadAnswers, 1000);
 loadAnswers();
 
-// Fungsi Baru: Aktifkan nomor soal secara langsung saat diklik
-// Fungsi: Aktifkan nomor soal secara langsung saat diklik
 function setActiveQuestion(questionNumber) {
-    fetch("/round/{{ $round->id }}/spatial-control", { // Sesuaikan URL dengan route controller Anda
+    fetch("/round/{{ $round->id }}/spatial-control", { 
         method: "POST",
         headers: {
             "Content-Type": "application/json",
