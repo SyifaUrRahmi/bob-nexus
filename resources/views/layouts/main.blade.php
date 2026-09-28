@@ -78,8 +78,9 @@
     @if ($showSplash)
         <div id="splash-screen">
             <div class="logo-container">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" width="500">
-                <h3>Battle of Brain</h3>
+                <img src="{{ asset('images/logo.png') }}?v={{ time() }}" alt="Logo" width="900">
+                <!-- <img src="{{ asset('images/logo.png') }}" alt="Logo" width="500"> -->
+                <!-- <h3>Battle of Brain</h3> -->
             </div>
         </div>
     @endif

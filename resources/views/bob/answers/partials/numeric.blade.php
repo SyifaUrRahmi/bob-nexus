@@ -38,7 +38,7 @@
             @for ($i = 1; $i <= 9; $i++)
                 <button type="button" class="keypad-circle" 
                     onclick="addNumber('{{ $i }}')" 
-                    {{ $isMaxed ? 'disabled' : '' }} style="background: #dd3f66;">
+                    {{ $isMaxed ? 'disabled' : '' }} style="background: #f4c7d3">
                     {{ $i }}
                 </button>
             @endfor
@@ -47,7 +47,7 @@
 
             <button type="button" class="keypad-circle" 
                 onclick="addNumber('0')" 
-                {{ $isMaxed ? 'disabled' : '' }} style="background: #dd3f66;">
+                {{ $isMaxed ? 'disabled' : '' }} style="background: #f4c7d3">
                 0
             </button>
 

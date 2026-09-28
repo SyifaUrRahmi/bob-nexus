@@ -6,21 +6,16 @@
             overflow: hidden;
         }
 
-        .color-list {
-  color: #8f9cf9;
-  color: #98ee5e;
-  color: #de89f1;
-  color: #dd3f66;
-  color: #fbcd70;
-  color: #5a70f9;
-  color: #93a1ff;
-  color: #ff6b22
-}
-
         .left-panel {
-            background: #5a70f9;;
-            
-            color: white;
+            background: #c3e6db;
+            color: #660033;
+        }
+
+        /* CSS untuk Gambar di Panel Kiri (Atas dan Bawah) */
+        .left-panel-img {
+            max-width: 100px; /* Silakan atur lebar gambar di sini */
+            height: auto;
+            object-fit: contain;
         }
 
         .round-number {
@@ -39,14 +34,21 @@
         }
 
         .top-section {
-            /* background: #f8f9fa; */
-            background: #fbcd70;
-            color: #ffffff;
+            background-color: #fff4bd;
+            color: #660033;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 40px; /* Jarak antara teks dan gambar di sampingnya */
             font-size: 1.8rem;
             font-weight: bold;
+        }
+
+        /* CSS untuk Gambar di Panel Atas (Samping Kiri dan Kanan) */
+        .top-section-img {
+            height: 90px; /* Atur tinggi gambar di sini */
+            width: auto;
+            object-fit: contain;
         }
 
         .answer-display {
@@ -66,8 +68,8 @@
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            background-color: #FDDA09;
-            color: white;
+            background-color: #f4c7d3;
+            color: #660033;
             font-size: 1.8rem;
             font-weight: bold;
             border: none;
@@ -85,12 +87,6 @@
             font-weight: bold;
         }
 
-        .answer-display {
-            height: 80px;
-            font-size: 2rem;
-            text-align: right;
-        }
-
         .keypad-btn {
             height: 70px;
             font-size: 1.5rem;
@@ -103,6 +99,9 @@
 
             <!-- LEFT 30% -->
             <div class="col-lg-2 left-panel d-flex flex-column justify-content-center align-items-center text-center">
+
+                <!-- 1. GAMBAR POSISI ATAS -->
+                <img src="{{ asset('images/gambar3.png') }}" alt="Logo Atas" class="left-panel-img mb-4">
 
                 <div class="round-number">
                     ROUND {{ $round->number }}
@@ -118,14 +117,24 @@
                     <div>{{ $participant->name }}</div>
                 </div>
 
+                <!-- 2. GAMBAR POSISI BAWAH -->
+                <img src="{{ asset('images/gambar1.png') }}" alt="Logo Bawah" class="left-panel-img mt-4">
+
             </div>
 
             <!-- RIGHT 70% -->
             <div class="col-lg-10 d-flex flex-column p-0">
 
                 <!-- TOP 20% -->
+                <!-- GAMBAR POSISI SAMPING KIRI DAN KANAN TEKS -->
                 <div class="top-section" style="height:15%;">
-                    ENTER YOUR ANSWER
+                    <img src="{{ asset('images/gambar7.png') }}" alt="Icon Kiri" class="top-section-img">
+                    <img src="{{ asset('images/gambar2.png') }}" alt="Icon Kiri" class="top-section-img">
+                    <img src="{{ asset('images/gambar3.png') }}" alt="Icon Kiri" class="top-section-img">
+                    <span>ENTER YOUR ANSWER</span>
+                    <img src="{{ asset('images/gambar4.png') }}" alt="Icon Kanan" class="top-section-img">
+                    <img src="{{ asset('images/gambar5.png') }}" alt="Icon Kanan" class="top-section-img">
+                    <img src="{{ asset('images/gambar6.png') }}" alt="Icon Kanan" class="top-section-img">
                 </div>
 
                 <!-- BOTTOM 80% -->

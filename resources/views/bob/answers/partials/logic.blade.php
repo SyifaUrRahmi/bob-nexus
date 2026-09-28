@@ -16,11 +16,11 @@
     border-radius: 4px;
 }
 #logicalBoardScrollContainer::-webkit-scrollbar-thumb {
-    background: #0d6efd;
+    background: #87c3fa;
     border-radius: 4px;
 }
 #logicalBoardScrollContainer::-webkit-scrollbar-thumb:hover {
-    background: #0b5ed7;
+    background: #87c3fa;
 }
 
 .board-card {
@@ -38,7 +38,7 @@
 /* Warna Status Soal */
 .q-available {
     background-color: #f8f9fa;
-    border: 2px solid #0d6efd;
+    border: 2px solid #87c3fa;
     color: #0d6efd;
 }
 .q-available:hover {

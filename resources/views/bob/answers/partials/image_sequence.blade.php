@@ -161,7 +161,7 @@ box-shadow:0 2px 5px rgba(0,0,0,.15);
             <div class="col-lg-4 d-flex flex-column">
 
                 <h5 class="mb-3">
-                    Gambar Acak
+                    Shuffled images
                 </h5>
 
                 <div id="imagePool" class="image-pool">
