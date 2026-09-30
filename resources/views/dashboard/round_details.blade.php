@@ -93,7 +93,7 @@
 
                     {{-- GRID TOMBOL 12 SOAL (3x4) --}}
                     <div class="row justify-content-center g-2 mt-2" style="max-width: 500px; margin: 0 auto;">
-                        @for ($q = 1; $q <= 12; $q++)
+                        @for ($q = 1; $q <= 15; $q++)
                             @php
                                 $isActive = $activeSetting && $activeSetting->question_number == $q;
                             @endphp
