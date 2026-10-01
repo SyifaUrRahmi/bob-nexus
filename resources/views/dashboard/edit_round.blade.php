@@ -203,7 +203,7 @@
                 let html = `
                     <div class="card mb-4 shadow-sm">
                         <div class="card-header">
-                            <strong>Kunci Jawaban Spatial (12 Soal)</strong>
+                            <strong>Kunci Jawaban Spatial (15 Soal)</strong>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -212,7 +212,7 @@
                 // Ambil data spatial yang sudah diformat dari Controller
                 const spatialAnswers = @json($spatialAnswers ?? []);
 
-                for (let question = 1; question <= 12; question++) {
+                for (let question = 1; question <= 15; question++) {
                     const val = (type.value === existingType && spatialAnswers[question] !== undefined) 
                         ? spatialAnswers[question] 
                         : '';
