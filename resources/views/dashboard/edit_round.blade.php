@@ -241,8 +241,8 @@
                 
                 // 2. Kalkulasi Otomatis Jumlah Papan
                 const totalQuestions = Object.keys(logicAnswers).length;
-                let defaultQPerBoard = 10; // Anda bisa ubah defaultnya jika mau
-                let defaultBoards = 5;     // Nilai bawaan jika kosong
+                let defaultQPerBoard = 12; // Anda bisa ubah defaultnya jika mau
+                let defaultBoards = 4;     // Nilai bawaan jika kosong
                 
                 if (totalQuestions > 0) {
                     defaultBoards = Math.ceil(totalQuestions / defaultQPerBoard);

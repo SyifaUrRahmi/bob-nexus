@@ -247,14 +247,25 @@ class RoundController extends Controller
         // 4. LOGICAL
         // ==========================================
         elseif ($request->type === 'logic') {
-            foreach ($request->logic_answers as $questionNumber => $correctAnswer) {
-                RoundSetting::create([
-                    'round_id'        => $round->id,
-                    'session_number'  => 1,
-                    'question_number' => $questionNumber,
-                    'correct_answer'  => strtoupper(trim($correctAnswer)),
-                    'is_active'       => true,
-                ]);
+            // Ambil input jumlah soal per papan dari form admin (default 10 jika kosong)
+            $qPerBoard = (int) $request->input('questions_per_board', 10);
+
+            // Pastikan admin mengirimkan input logic_answers
+            if ($request->has('logic_answers')) {
+                foreach ($request->logic_answers as $questionNumber => $correctAnswer) {
+                    
+                    // Rumus membagi nomor soal global untuk mengetahui ini ada di papan ke-berapa
+                    // Contoh jika 1 papan 10 soal: Soal 1-10 -> Papan 1, Soal 11-20 -> Papan 2, dst.
+                    $boardNumber = ceil($questionNumber / $qPerBoard);
+
+                    RoundSetting::create([
+                        'round_id'        => $round->id,
+                        'session_number'  => $boardNumber, // <-- Jadikan nomor papan
+                        'question_number' => $questionNumber,
+                        'correct_answer'  => $correctAnswer,
+                        'is_active'       => true,
+                    ]);
+                }
             }
         }
 

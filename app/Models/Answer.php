@@ -13,6 +13,7 @@ class Answer extends Model
         'answer',
         'attempt',
         'is_correct',
+        'session_number',
         'score'
     ];
 

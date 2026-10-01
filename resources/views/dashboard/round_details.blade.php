@@ -114,7 +114,7 @@
         {{-- TAMPILAN KHUSUS LOGIC: MONITORING GRID PAPAN SOAL --}}
         @if ($round->type === 'logic')
             @php
-                $questionsPerBoard = $round->questions_per_board ?? 10;
+                $questionsPerBoard = $round->questions_per_board ?? 12;
                 $settingsCollection = $round->roundSettings ?? $round->roundsettings;
                 $groupedSettings = $settingsCollection ? $settingsCollection->sortBy('question_number')->chunk($questionsPerBoard) : collect();
             @endphp
@@ -124,7 +124,7 @@
                     @php
                         $boardNum = $boardIndex + 1;
                         $firstQ = $settings->first()->question_number ?? 1;
-                        $lastQ = $settings->last()->question_number ?? 10;
+                        $lastQ = $settings->last()->question_number ?? 12;
                     @endphp
                     <div class="col">
                         <div class="card admin-board-card h-100">

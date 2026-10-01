@@ -64,7 +64,7 @@
 {{-- BUNGKUS DENGAN DIV KHUSUS SCROLL --}}
 <div id="logicalBoardScrollContainer" class="container-fluid py-3">
     @php
-        $questionsPerBoard = $round->questions_per_board ?? 10;
+        $questionsPerBoard = $round->questions_per_board ?? 12;
         $settingsCollection = $round->roundSettings ?? $round->roundsettings;
         $groupedSettings = $settingsCollection ? $settingsCollection->sortBy('question_number')->chunk($questionsPerBoard) : collect();
     @endphp
@@ -75,7 +75,7 @@
                 @php
                     $boardNum = $boardIndex + 1;
                     $firstQ = $settings->first()->question_number ?? 1;
-                    $lastQ = $settings->last()->question_number ?? 10;
+                    $lastQ = $settings->last()->question_number ?? 12;
                 @endphp
                 <div class="col">
                     <div class="card board-card h-100">
@@ -91,7 +91,7 @@
                                             type="button" 
                                             id="btn-q-{{ $setting->question_number }}"
                                             class="btn question-btn q-available"
-                                            onclick="openAnswerModal({{ $setting->question_number }}, {{ $setting->id }})">
+                                            onclick="openAnswerModal({{ $setting->question_number }}, {{ $setting->id }}, {{ $boardNum }})">
                                             {{ $setting->question_number }}
                                         </button>
                                     </div>
@@ -121,6 +121,7 @@
                     <input type="hidden" name="participant_id" value="{{ $participant->id }}">
                     <input type="hidden" name="question_number" id="modalQuestionNumInput">
                     <input type="hidden" name="round_setting_id" id="modalRoundSettingIdInput">
+                    <input type="hidden" name="board_number" id="modalBoardNumInput">
 
                     <!-- <label class="form-label fw-bold text-muted mb-2">MASUKKAN JAWABAN ANDA:</label> -->
                     <input 
@@ -143,19 +144,30 @@
 
 <script>
 // Fungsi Pembuka Modal (Global)
-window.openAnswerModal = function(qNum, settingId) {
+// Tambahkan parameter boardNum di dalam kurung
+window.openAnswerModal = function(qNum, settingId, boardNum) {
+    console.log('Q:', qNum);
+    console.log('Setting ID:', settingId);
+    console.log('Board / Session:', boardNum);
+
     document.getElementById('modalQNum').innerText = '#' + qNum;
     document.getElementById('modalQuestionNumInput').value = qNum;
     document.getElementById('modalRoundSettingIdInput').value = settingId;
+    document.getElementById('modalBoardNumInput').value = boardNum;
     document.getElementById('modalAnswerInput').value = '';
 
     const modalEl = document.getElementById('answerModal');
     let modalObj = bootstrap.Modal.getInstance(modalEl);
+
     if (!modalObj) {
         modalObj = new bootstrap.Modal(modalEl);
     }
+
     modalObj.show();
-    setTimeout(() => document.getElementById('modalAnswerInput').focus(), 400);
+
+    setTimeout(() => {
+        document.getElementById('modalAnswerInput').focus();
+    }, 400);
 };
 
 // Fungsi Fetch Status Soal (Global)
@@ -306,7 +318,7 @@ document.addEventListener('submit', async function(e) {
             console.error('ERROR SUBMIT:', error);
             Swal.fire({
                 icon: 'error',
-                title: 'Gagal Menyimpan',
+                title: 'Failed to save',
                 text: error.message
             });
         }
