@@ -130,7 +130,7 @@ function deleteNumber() {
 }
 
 function submitAnswer(e) {
-    e.preventDefault();
+    if (e) e.preventDefault(); // Pastikan ada pengecekan jika e tidak dikirim (saat enter via keyboard)
     if (isSubmitted) return;
 
     const form = document.getElementById('spatialForm');
@@ -163,6 +163,28 @@ function submitAnswer(e) {
         document.querySelectorAll('.input-control').forEach(el => el.disabled = false);
     });
 }
+
+// === FITUR TAMBAHAN: DETEKSI KEYBOARD ===
+document.addEventListener('keydown', function(event) {
+    // Jika jawaban sudah di-submit, abaikan input keyboard
+    if (isSubmitted) return;
+
+    // Deteksi jika tombol yang ditekan adalah angka 0-9
+    if (/^[0-9]$/.test(event.key)) {
+        addNumber(event.key);
+    } 
+    // Deteksi tombol Backspace atau Delete
+    else if (event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault(); // Mencegah browser back halaman
+        deleteNumber();
+    } 
+    // Deteksi tombol Enter untuk Submit
+    else if (event.key === 'Enter') {
+        event.preventDefault(); // Mencegah reload form bawaan browser
+        document.getElementById('submitBtn').click(); // Trigger tombol submit
+    }
+});
+// =========================================
 
 // Polling: Mengecek apakah Admin sudah mengganti ke soal berikutnya
 setInterval(() => {
